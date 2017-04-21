@@ -1,0 +1,233 @@
+<div class="apidocDiv">
+<style>
+/*csslint
+*/
+.apidocDiv {
+    background: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.apidocDiv a[href] {
+    color: #33f;
+    font-weight: bold;
+    text-decoration: none;
+}
+.apidocDiv a[href]:hover {
+    text-decoration: underline;
+}
+.apidocCodeCommentSpan {
+    background: #bbf;
+    color: #000;
+    display: block;
+}
+.apidocCodeKeywordSpan {
+    color: #d00;
+    font-weight: bold;
+}
+.apidocCodePre {
+    background: #eef;
+    border: 1px solid;
+    color: #777;
+    padding: 5px;
+    white-space: pre-wrap;
+}
+.apidocFooterDiv {
+    margin-top: 20px;
+    text-align: center;
+}
+.apidocModuleLi {
+    margin-top: 10px;
+}
+.apidocSectionDiv {
+    border-top: 1px solid;
+    margin-top: 20px;
+}
+.apidocSignatureSpan {
+    color: #777;
+    font-weight: bold;
+}
+</style>
+<h1>api documentation for
+    <a
+
+        href="https://github.com/pinojs/express-pino-logger#readme"
+
+    >express-pino-logger (v2.0.0)</a>
+</h1>
+<h4>An express middleware to log with pino</h4>
+<div class="apidocSectionDiv"><a
+    href="#apidoc.tableOfContents"
+    id="apidoc.tableOfContents"
+><h1>table of contents</h1></a><ol>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.express-pino-logger">module express-pino-logger</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.express-pino-logger.express-pino-logger">
+            function <span class="apidocSignatureSpan"></span>express-pino-logger
+            <span class="apidocSignatureSpan">(opts, stream)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <span class="apidocSignatureSpan">object <span class="apidocSignatureSpan">express-pino-logger.</span>stdSerializers</span>
+
+        </li>
+
+    </ol></li>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.express-pino-logger.stdSerializers">module express-pino-logger.stdSerializers</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.express-pino-logger.stdSerializers.req">
+            function <span class="apidocSignatureSpan">express-pino-logger.stdSerializers.</span>req
+            <span class="apidocSignatureSpan">(req)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.express-pino-logger.stdSerializers.res">
+            function <span class="apidocSignatureSpan">express-pino-logger.stdSerializers.</span>res
+            <span class="apidocSignatureSpan">(res)</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
+</ol></div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.express-pino-logger" id="apidoc.module.express-pino-logger">module express-pino-logger</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.express-pino-logger.express-pino-logger" id="apidoc.element.express-pino-logger.express-pino-logger">
+        function <span class="apidocSignatureSpan"></span>express-pino-logger
+        <span class="apidocSignatureSpan">(opts, stream)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">function pinoLogger(opts, stream) {
+  if (opts &#x26;&#x26; opts._writableState) {
+    stream = opts
+    opts = null
+  }
+
+  opts = opts || {}
+  opts.serializers = opts.serializers || {}
+  opts.serializers.req = opts.serializers.req || asReqValue
+  opts.serializers.res = opts.serializers.res || pino.stdSerializers.res
+  opts.serializers.err = opts.serializers.err || pino.stdSerializers.err
+
+  var useLevel = opts.useLevel || &#x27;info&#x27;
+  delete opts.useLevel
+
+  var theStream = opts.stream || stream
+  delete opts.stream
+
+  var logger = wrapChild(opts, theStream)
+  var genReqId = reqIdGenFactory(opts.genReqId)
+  loggingMiddleware.logger = logger
+  return loggingMiddleware
+
+  function onResFinished (err) {
+    this.removeListener(&#x27;finish&#x27;, onResFinished)
+    this.removeListener(&#x27;error&#x27;, onResFinished)
+
+    var log = this.log
+    var responseTime = Date.now() - this.startTime
+
+    if (err) {
+      log.error({
+        res: this,
+        err: err,
+        responseTime: responseTime
+      }, &#x27;request errored&#x27;)
+      return
+    }
+
+    log[useLevel]({
+      res: this,
+      responseTime: responseTime
+    }, &#x27;request completed&#x27;)
+  }
+
+  function loggingMiddleware (req, res, next) {
+    req.id = genReqId(req)
+    req.log = res.log = logger.child({req: req})
+    res.startTime = Date.now()
+    if (!req.res) { req.res = res }
+
+    res.on(&#x27;finish&#x27;, onResFinished)
+    res.on(&#x27;error&#x27;, onResFinished)
+
+    if (next) {
+      next()
+    }
+  }
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+
+
+</div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.express-pino-logger.stdSerializers" id="apidoc.module.express-pino-logger.stdSerializers">module express-pino-logger.stdSerializers</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.express-pino-logger.stdSerializers.req" id="apidoc.element.express-pino-logger.stdSerializers.req">
+        function <span class="apidocSignatureSpan">express-pino-logger.stdSerializers.</span>req
+        <span class="apidocSignatureSpan">(req)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">function asReqValue(req) {
+  return {
+    id: req.id,
+    method: req.method,
+    url: req.url,
+    headers: req.headers,
+    remoteAddress: req.connection.remoteAddress,
+    remotePort: req.connection.remotePort
+  }
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.express-pino-logger.stdSerializers.res" id="apidoc.element.express-pino-logger.stdSerializers.res">
+        function <span class="apidocSignatureSpan">express-pino-logger.stdSerializers.</span>res
+        <span class="apidocSignatureSpan">(res)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">function asResValue(res) {
+  return {
+    statusCode: res.statusCode,
+    header: res._header
+  }
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocFooterDiv">
+    [ this document was created with
+    <a href="https://github.com/kaizhu256/node-utility2" target="_blank">utility2</a>
+    ]
+</div>
+</div>
